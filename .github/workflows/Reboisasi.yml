@@ -1,0 +1,58 @@
+name: Reboisasi
+
+permissions:
+  contents: write
+  
+on:
+  schedule:
+    # Jalan 1x sehari (aman & jelas)
+    - cron: "0 0 * * *"
+  workflow_dispatch:
+
+jobs:
+  update-repo:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+        with:
+          token: ${{ secrets.REPO_TOKEN }}
+
+      - name: Update README with timestamp (WIB)
+        run: |
+          export TZ="Asia/Jakarta"
+          date +"%Y-%m-%d %H:%M:%S %Z" > README.md
+
+      - name: Configure Git (using secrets)
+        run: |
+          git config user.name "${{ secrets.GIT_USERNAME }}"
+          git config user.email "${{ secrets.GIT_EMAIL }}"
+
+      - name: Commit changes
+        run: |
+          git add README.md
+          export TZ="Asia/Jakarta"
+          TIMESTAMP=$(date +"%Y-%m-%d %H:%M:%S %Z")
+
+          messages=(
+            "chore(bot): 😂 auto commit"
+            "chore(bot): 😱 auto commit"
+            "chore(bot): 👿 auto commit"
+            "chore(bot): 💩 auto commit"
+            "chore(bot): 🙏 auto commit"
+            "chore(bot): 🙈 auto commit"
+            "chore(bot): 🐐 auto commit"
+            "chore(bot): 🤖 auto commit"
+            "chore(bot): 🟩 auto commit"
+            "chore(bot): 👻 auto commit"
+          )
+
+          rand=$((RANDOM % ${#messages[@]}))
+          git commit -m "${messages[$rand]} at $TIMESTAMP" || echo "No changes to commit"
+
+      - name: Push changes
+        env:
+          GITHUB_TOKEN: ${{ secrets.REPO_TOKEN }}
+        run: |
+          git push origin main
